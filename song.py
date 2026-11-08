@@ -31,11 +31,11 @@ STRUCT = {
         sleep=[(0, 32), (79, 96)],
         outro=8),
     "short": dict(
-        intro=4,
-        sections=[(4, "normal", None)],
-        canon2=None,
-        day=[(0, 0), (4, 0), (28, .18), (34, 1)],
-        sleep=[(0, 28)],
+        intro=8,
+        sections=[(8, "normal", None), (40, "canon", "En canon !")],
+        canon2=48,
+        day=[(0, 0), (8, 0), (32, .18), (38, 1)],
+        sleep=[(0, 32)],
         outro=4),
 }
 
