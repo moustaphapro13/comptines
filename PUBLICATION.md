@@ -21,3 +21,6 @@ La chaîne « Ding Dang comptines » est connectée dans le navigateur intégré
 6. Lire le lien dans `ytcp-video-share-dialog`, l'ajouter à `published.json`.
 
 Créneaux : vidéo longue le mercredi 17:00, Short le samedi 11:00 (heure de Paris).
+
+## Choisir la bonne chaîne
+Avant d'importer, aller sur `https://www.youtube.com/channel_switcher` et cliquer la chaîne de la langue (Ding Dang comptines / Ding Dang Nursery Rhymes / …), puis ouvrir `https://studio.youtube.com` et vérifier le nom de la chaîne en haut du menu de Studio. Pour une chaîne anglaise ou espagnole, la langue de la vidéo est l'anglais / l'espagnol (titres, description, tags dans la langue).

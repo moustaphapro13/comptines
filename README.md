@@ -29,3 +29,17 @@ mkdir -p /home/claude/voice && tar xzf /tmp/v.tgz -C /home/claude/voice
 3. Rendre long + short, écrire miniature et métadonnées.
 4. Publier : vidéo longue le mercredi 17 h, Short le samedi 11 h (heure de Paris) via `publishAt`.
 5. Mettre à jour `published.json`, commit, push.
+
+## Langues et chaînes (même compte Google)
+| Langue | Chaîne YouTube | File | Voix Piper (release v0.0.2) |
+|---|---|---|---|
+| fr | Ding Dang comptines (@Dingdangcomptines) | `queue.json` | `voice-fr-siwis-medium` |
+| en | Ding Dang Nursery Rhymes (@dingdangnurseryrhymes) | `queues_langues.json` → `en` | `voice-en-us-lessac-medium` |
+| es | à créer (Ding Dang Canciones Infantiles) | `queues_langues.json` → `es` | `voice-es-mls_10246-low` |
+
+Voix : `https://github.com/rhasspy/piper/releases/download/v0.0.2/voice-<nom>.tar.gz`, à extraire dans `/home/claude/voice/`, puis pointer `VOICE` de `sing.py` dessus et écrire la table `PHON` (syllabe → phonèmes IPA de la voix) pour la comptine. Vidéos par langue dans `out/<langue>/<comptine>/` (le français historique reste dans `out/<comptine>/`). Les journaux de publication : `published.json` (fr), `published_en.json`, `published_es.json`.
+
+## Rythme de publication (heure de Paris)
+- **Short (~1 min) : tous les jours à 11:00**, une nouvelle comptine par jour et par langue.
+- **Vidéo longue (2–3 min) : seulement lundi, mercredi et vendredi à 17:00** — la version longue de la comptine du jour.
+- TikTok : pas d'automatisation possible (TikTok bloque l'import par script) → déposer chaque Short + légende dans `C:\Users\moust\Videos\Comptines\TikTok\<langue>\` sur l'ordi de l'utilisateur ; il publie lui-même.
