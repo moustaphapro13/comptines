@@ -1,26 +1,15 @@
-# Publication via YouTube Studio (navigateur intégré de l'app Claude)
+# Publication via YouTube Studio (navigateur intégré de l'app Claude, ordi Windows de l'utilisateur)
 
-La chaîne « Ding Dang comptines » est connectée dans le navigateur intégré de l'app Claude sur l'ordi Windows de l'utilisateur. Pas d'API YouTube : on remplit YouTube Studio comme un humain.
+Chaînes (même compte Google) : **Ding Dang comptines** (fr, UCmC_G9eVJ6ePrs3XI3m1ttQ) et **Ding Dang Nursery Rhymes** (en, UCoMhaBackdsRCc_1A1c4EyQ).
 
-1. `git push` les fichiers de `out/<comptine>/` : ils deviennent lisibles sur
-   `https://raw.githubusercontent.com/moustaphapro13/comptines/main/out/<comptine>/<fichier>` (CORS ouvert, YouTube Studio peut les `fetch`).
-2. Ouvrir `https://studio.youtube.com` (demander l'accès au site si besoin), bouton « Créer » → « Importer des vidéos ».
-3. Injecter la vidéo sans fenêtre Windows (javascript_tool) :
-   ```js
-   const b = await (await fetch(RAW_URL)).blob();
-   const inp = document.querySelector('input[type=file]');
-   const dt = new DataTransfer(); dt.items.add(new File([b], "video.mp4", {type: "video/mp4"}));
-   inp.files = dt.files; inp.dispatchEvent(new Event('change', {bubbles: true}));
-   ```
-4. Après ~6 s, dans `ytcp-uploads-dialog` :
-   - titre / description : `#textbox[contenteditable="true"]` [0] et [1] → `focus(); execCommand('selectAll'); execCommand('insertText', false, txt)`
-   - miniature (vidéo longue) : même injection sur `#file-loader`
-   - « conçu pour les enfants » : `tp-yt-paper-radio-button[name="VIDEO_MADE_FOR_KIDS_MFK"]`.click()
-   - tags : `#toggle-button` (Plus) puis `#tags-container input` = tags séparés par des virgules + `,` + Entrée
-5. `#next-button` ×3 → « Programmer » → choisir la date dans le calendrier et l'heure dans la liste (clics), puis `#done-button`.
-6. Lire le lien dans `ytcp-video-share-dialog`, l'ajouter à `published.json`.
+1. Pousser d'abord les vidéos sur GitHub (dépôt public) : YouTube Studio les récupère via `raw.githubusercontent.com`.
+2. Changer de chaîne : `https://www.youtube.com/channel_switcher` → cliquer la chaîne (mettre l'onglet au premier plan avec tabs_select si la page reste blanche), puis ouvrir `https://studio.youtube.com` et vérifier le nom de la chaîne (`#entity-name`). Ouvrir directement l'URL Studio de l'autre chaîne donne une erreur 403.
+3. Coller `tools/studio_helpers.js` avec javascript_tool, puis pour chaque vidéo (planning dans `semaine_<date>.json`) :
+   - `await __A("out/fr/xxx/short.json", "17 nov. 2026")` → doit finir par `ready 17 nov. 2026` ou `same`
+   - vraie touche **Entrée** (outil computer, key "Return") — la date ne se valide qu'avec un vrai appui clavier
+   - `await __C("17 nov. 2026", "11:00")` → date, heure et lien
+   Une vidéo par appel (les appels longs peuvent être coupés). Si une étape renvoie `STOP`, regarder l'écran avant de continuer : ne jamais relancer `__A` pour une vidéo peut-être déjà importée (doublon).
+4. Contrôler à la fin les listes `…/videos/short` et `…/videos/upload` de chaque chaîne (titre + « Programmée »).
+5. Shorts + légendes pour TikTok : copiés sur l'ordi dans `C:\Users\moust\Videos\Comptines\TikTok\<langue>\<date>_<slug>.mp4/.txt` (device_commit_files). TikTok bloque l'import par script : l'utilisateur choisit le fichier dans TikTok Studio, ensuite Claude peut remplir légende (saisie clavier, pas de execCommand), étiquette IA et programmation.
 
-Créneaux : vidéo longue le mercredi 17:00, Short le samedi 11:00 (heure de Paris).
-
-## Choisir la bonne chaîne
-Avant d'importer, aller sur `https://www.youtube.com/channel_switcher` et cliquer la chaîne de la langue (Ding Dang comptines / Ding Dang Nursery Rhymes / …), puis ouvrir `https://studio.youtube.com` et vérifier le nom de la chaîne en haut du menu de Studio. Pour une chaîne anglaise ou espagnole, la langue de la vidéo est l'anglais / l'espagnol (titres, description, tags dans la langue).
+Créneaux : Short tous les jours 11:00 ; vidéo longue lundi, mercredi, vendredi 17:00 (heure de Paris). Toujours « conçu pour les enfants ». Ne jamais publier immédiatement : toujours programmer.
