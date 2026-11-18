@@ -52,28 +52,28 @@ def make(path, kind, date, time):
 
 
 WEEK = [
-    ("songs/en/hot_cross_buns.py", "short", "2026-11-10", "11:00"),
-    ("songs/fr/au_clair_de_la_lune.py", "short", "2026-11-10", "11:00"),
-    ("songs/en/twinkle_twinkle.py", "short", "2026-11-11", "11:00"),
-    ("songs/en/twinkle_twinkle.py", "long", "2026-11-11", "17:00"),
-    ("songs/fr/joyeux_anniversaire.py", "short", "2026-11-11", "11:00"),
-    ("songs/en/row_your_boat.py", "short", "2026-11-12", "11:00"),
-    ("songs/fr/ah_vous_dirai_je.py", "short", "2026-11-12", "11:00"),
-    ("songs/en/mary_lamb.py", "short", "2026-11-13", "11:00"),
-    ("songs/en/mary_lamb.py", "long", "2026-11-13", "17:00"),
-    ("songs/fr/au_clair_pierrot.py", "short", "2026-11-13", "11:00"),
-    ("songs/fr/au_clair_de_la_lune.py", "long", "2026-11-13", "17:00"),
-    ("songs/en/london_bridge.py", "short", "2026-11-14", "11:00"),
-    ("songs/en/brother_john.py", "short", "2026-11-15", "11:00"),
-    ("songs/fr/au_clair_lubin.py", "short", "2026-11-15", "11:00"),
-    ("songs/en/old_macdonald.py", "short", "2026-11-16", "11:00"),
-    ("songs/en/old_macdonald.py", "long", "2026-11-16", "17:00"),
-    ("songs/fr/frere_jacques_canon.py", "short", "2026-11-16", "11:00"),
-    ("songs/fr/ah_vous_dirai_je.py", "long", "2026-11-16", "17:00"),
+    ("songs/fr/savez_vous_planter_les_choux.py", "short", "2026-11-19", "11:00"),
+    ("songs/en/this_old_man.py", "short", "2026-11-19", "11:00"),
+    ("songs/fr/sur_le_pont_d_avignon.py", "short", "2026-11-20", "11:00"),
+    ("songs/fr/savez_vous_planter_les_choux.py", "long", "2026-11-20", "17:00"),
+    ("songs/en/hickory_dickory_dock.py", "short", "2026-11-20", "11:00"),
+    ("songs/en/this_old_man.py", "long", "2026-11-20", "17:00"),
+    ("songs/fr/savez_vous_planter_les_choux_2.py", "short", "2026-11-21", "11:00"),
+    ("songs/en/this_old_man_2.py", "short", "2026-11-21", "11:00"),
+    ("songs/fr/sur_le_pont_d_avignon_2.py", "short", "2026-11-22", "11:00"),
+    ("songs/en/old_macdonald_2.py", "short", "2026-11-22", "11:00"),
+    ("songs/fr/au_clair_karaoke.py", "short", "2026-11-23", "11:00"),
+    ("songs/fr/sur_le_pont_d_avignon.py", "long", "2026-11-23", "17:00"),
+    ("songs/en/this_old_man_3.py", "short", "2026-11-23", "11:00"),
+    ("songs/en/hickory_dickory_dock.py", "long", "2026-11-23", "17:00"),
+    ("songs/fr/sur_le_pont_d_avignon_3.py", "short", "2026-11-24", "11:00"),
+    ("songs/en/hickory_dickory_dock_2.py", "short", "2026-11-24", "11:00"),
+    ("songs/fr/savez_vous_planter_les_choux_3.py", "short", "2026-11-25", "11:00"),
+    ("songs/en/this_old_man_4.py", "short", "2026-11-25", "11:00"),
 ]
 
 if __name__ == "__main__":
     sched = [make(*w) for w in WEEK]
-    json.dump(sched, open("semaine_2026-11-10.json", "w"), ensure_ascii=False, indent=1)
+    json.dump(sched, open("semaine_2026-11-19.json", "w"), ensure_ascii=False, indent=1)
     for s in sched:
         print(s["date"], s["time"], s["channel"][:14], s["kind"], s["title"])

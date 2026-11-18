@@ -370,10 +370,11 @@ def critter(size, kind="lamb", mood="happy", col=None):
     cx = w / 2
     body = {"lamb": "#FFFFFF", "sheep": "#3A3A44", "mouse": "#9AA5B1", "cow": "#FFFFFF", "pig": "#FFB3C6",
             "duck": "#FFD84A", "girl": "#FF8FB1", "boy": "#6EC6FF", "pierrot": "#FFFFFF", "bear": "#B07A4E",
-            "cat": "#F2A65A", "wolf": "#8E9AAF", "egg": "#FFF4E0", "frog": "#7BD389"}[kind]
+            "cat": "#F2A65A", "wolf": "#8E9AAF", "egg": "#FFF4E0", "frog": "#7BD389", "dog": "#D9A066",
+            "man": "#8E6CCF"}[kind]
     if col:
         body = col
-    skin = {"girl": "#FFD9BC", "boy": "#FFD9BC", "pierrot": "#FFFFFF", "lamb": "#FFE7D6", "sheep": "#5A5A66",
+    skin = {"girl": "#FFD9BC", "boy": "#FFD9BC", "man": "#FFD9BC", "pierrot": "#FFFFFF", "lamb": "#FFE7D6", "sheep": "#5A5A66",
             "egg": "#FFF4E0"}.get(kind, body)
     R = size * .3
     hy = h * .41
@@ -410,6 +411,10 @@ def critter(size, kind="lamb", mood="happy", col=None):
     if kind in ("cat", "wolf"):
         for s in (-1, 1):
             p.poly([(cx + s * R * .9, hy - R * .3), (cx + s * R * .75, hy - R * 1.25), (cx + s * R * .2, hy - R * .75)], body)
+    if kind == "dog":
+        for sd in (-1, 1):
+            p.e(cx + sd * R * 1.0 - R * .3, hy - R * .5, cx + sd * R * 1.0 + R * .3, hy + R * .6, "#8B5A2B")
+        p.line([(cx + R * .8, by), (cx + R * 1.4, by - R * .4), (cx + R * 1.5, by - R * .8)], body, R * .15)
     if kind in ("bear",):
         p.c(cx - R * .75, hy - R * .7, R * .3, body); p.c(cx + R * .75, hy - R * .7, R * .3, body)
     if kind == "cow":
@@ -441,6 +446,11 @@ def critter(size, kind="lamb", mood="happy", col=None):
         p.c(cx + R * .75, hy - R * .85, R * .25, "#FF6F91")
     if kind == "boy":
         p.e(cx - R * .95, hy - R * 1.0, cx + R * .95, hy - R * .3, hair)
+    if kind == "man":
+        p.c(cx - R * .85, hy, R * .3, "#E8E8EE"); p.c(cx + R * .85, hy, R * .3, "#E8E8EE")
+        p.e(cx - R * 1.3, hy - R * .85, cx + R * 1.3, hy - R * .55, "#5A3E8A")
+        p.r(cx - R * .7, hy - R * 1.6, cx + R * .7, hy - R * .7, "#5A3E8A", rad=R * .15)
+        p.r(cx - R * .7, hy - R * 1.0, cx + R * .7, hy - R * .82, "#FFD84A")
     if kind == "pierrot":
         p.poly([(cx - R * .9, hy - R * .55), (cx, hy - R * 2.0), (cx + R * .9, hy - R * .55)], "#FFFFFF")
         p.c(cx, hy - R * 2.0, R * .15, "#2B2140")
@@ -453,12 +463,48 @@ def critter(size, kind="lamb", mood="happy", col=None):
         p.e(cx - R * .35, hy + R * .2, cx + R * .35, hy + R * .48, "#FF8C2A")
     if kind == "cow":
         p.e(cx - R * .5, hy + R * .25, cx + R * .5, hy + R * .75, "#FFC9D6")
+    if kind == "dog":
+        p.e(cx - R * .22, hy + R * .1, cx + R * .22, hy + R * .32, "#3A2A20")
+    if kind == "man":
+        p.e(cx - R * .55, hy + R * .45, cx + R * .55, hy + R * .75, "#E8E8EE")
     if kind == "pierrot":
         p.e(cx - R * .1, hy - R * .1, cx + R * .1, hy + R * .25, hexc("#2B2140", 160))
     return done(im, w, h, (w / 2, h))
 
 
-FACTORIES = dict(moon=moon, sun=sun, star=star, cloud=cloud, house=house, tree=tree, fir=fir, barn=barn,
+def cabbage(size):
+    w, h = size * 1.2, size
+    im, d = canvas(w, h); p = P(d)
+    for x, y, r, c in [(.25, .62, .25, "#5DB55A"), (.75, .62, .25, "#5DB55A"), (.5, .55, .32, "#7BD389"),
+                       (.38, .5, .2, "#A8E6A1"), (.62, .5, .2, "#A8E6A1"), (.5, .42, .18, "#C9F2C3")]:
+        p.c(w * x, h * y, w * r, c)
+    p.line([(w * .5, h * .3), (w * .5, h * .8)], "#5DB55A", w * .03)
+    return done(im, w, h, (w / 2, h))
+
+
+def bone(size):
+    w, h = size, size * .45
+    im, d = canvas(w, h); p = P(d)
+    p.r(w * .2, h * .35, w * .8, h * .65, "#FFF4E0")
+    for x in (.18, .82):
+        for y in (.32, .68):
+            p.c(w * x, h * y, h * .22, "#FFF4E0")
+    return done(im, w, h, (w / 2, h))
+
+
+def drum(size):
+    w, h = size, size * .9
+    im, d = canvas(w, h); p = P(d)
+    p.r(w * .1, h * .3, w * .9, h * .9, "#E85A4F")
+    p.e(w * .1, h * .8, w * .9, h, "#E85A4F")
+    for i in range(5):
+        x = .1 + i * .2
+        p.line([(w * x, h * .3), (w * (x + .1), h * .9)], "#FFD84A", w * .03)
+    p.e(w * .1, h * .18, w * .9, h * .42, "#FFF4E0")
+    return done(im, w, h, (w / 2, h))
+
+
+FACTORIES = dict(cabbage=cabbage, bone=bone, drum=drum, moon=moon, sun=sun, star=star, cloud=cloud, house=house, tree=tree, fir=fir, barn=barn,
                  fence=fence, bridge=bridge, boat=boat, oar=oar, cake=cake, flame=flame, balloon=balloon,
                  stall=stall, bun=bun, window_frame=window_frame, bell=bell, tower=tower, candy_jar=candy_jar,
                  lollipop=lollipop, snowman=snowman, clock=clock, pendulum=pendulum, critter=critter)
