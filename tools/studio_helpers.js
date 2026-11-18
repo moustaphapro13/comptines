@@ -9,8 +9,10 @@ window.sleep = ms => new Promise(r => setTimeout(r, ms));
 window.__close = async () => { [...document.querySelectorAll('ytcp-button, button')].filter(b => b.offsetParent && b.innerText.trim() === 'Fermer').forEach(b => b.click()); await sleep(1000); };
 window.__hidePops = () => [...document.querySelectorAll('tp-yt-iron-dropdown')].filter(e => e.offsetParent && /#\w/.test(e.innerText)).forEach(p => p.style.display = 'none');
 window.__open = async () => {
+  const item = () => [...document.querySelectorAll('tp-yt-paper-item')].find(i => /Importer des vidéos/.test(i.innerText) && i.offsetParent);
   const direct = [...document.querySelectorAll('ytcp-button, button')].find(e => e.innerText && e.innerText.trim() === 'Importer des vidéos' && e.offsetParent);
-  if (direct) direct.click(); else { document.querySelector('#create-icon')?.click(); await sleep(1000); [...document.querySelectorAll('tp-yt-paper-item')].find(i => /Importer des vidéos/.test(i.innerText))?.click(); }
+  if (direct) direct.click();
+  else { if (!item()) { (document.querySelector('#create-icon') || [...document.querySelectorAll('button')].find(e => e.innerText.trim() === 'Créer' && e.offsetParent))?.click(); await sleep(1500); } item()?.click(); }
   for (let i = 0; i < 25; i++) { await sleep(400); const inp = [...document.querySelectorAll('ytcp-uploads-file-picker input[type=file]')].find(x => x.closest('ytcp-uploads-dialog')); if (inp) return inp; }
   return null;
 };
