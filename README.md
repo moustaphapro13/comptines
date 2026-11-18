@@ -17,10 +17,16 @@ Ce dépôt fabrique et publie des comptines pour enfants : une vidéo longue (16
 
 ## Installation (session neuve)
 ```
-pip install --break-system-packages piper-tts pyworld librosa google-api-python-client google-auth-oauthlib
-curl -L -o /tmp/v.tgz https://github.com/rhasspy/piper/releases/download/v0.0.2/voice-fr-siwis-medium.tar.gz
-mkdir -p /home/claude/voice && tar xzf /tmp/v.tgz -C /home/claude/voice
+pip install --break-system-packages piper-tts pyworld librosa praat-parselmouth pycairo onnxruntime google-api-python-client google-auth-oauthlib
+mkdir -p /home/claude/voice/sherpa && cd /home/claude/voice
+# voix anglaise (comptines EN)
+curl -L -o /tmp/v.tgz https://github.com/rhasspy/piper/releases/download/v0.0.2/voice-en-us-lessac-medium.tar.gz && tar xzf /tmp/v.tgz -C /home/claude/voice
+# voix françaises récentes (vraies voyelles nasales) : comptines FR + série Ding et Dang
+cd sherpa && for m in vits-piper-fr_FR-siwis-medium vits-piper-fr_FR-upmc-medium vits-piper-fr_FR-tom-medium; do
+  curl -sSL https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/$m.tar.bz2 | tar xj; done
 ```
+Voix chantée : synthèse Piper syllabe par syllabe puis PSOLA (Praat via parselmouth) pour caler hauteur et durée — plus de vocodeur WORLD (trop robotique).
+Série « Ding et Dang » : `python3 -m serie.build serie/epXX.py render` (voir `serie/`).
 `secrets/` (client OAuth + jeton) n'est jamais dans un dépôt public.
 
 ## Routine hebdomadaire
