@@ -1,4 +1,5 @@
-// À coller (javascript_tool) dans un onglet YouTube Studio de la bonne chaîne, après chaque rechargement de page.
+// Chargement : eval(await (await fetch('https://raw.githubusercontent.com/moustaphapro13/comptines/main/tools/studio_helpers.js')).text())
+// ou à coller (javascript_tool) dans un onglet YouTube Studio de la bonne chaîne, après chaque rechargement de page.
 // Procédure par vidéo :
 //   1) JS : await __A("out/<lang>/<slug>/<short|long>.json", "16 nov. 2026")   -> doit finir par "ready 16 nov. 2026" (ou "same")
 //   2) clavier : touche Entrée (vraie touche, via l'outil computer key "Return") pour valider la date
@@ -9,6 +10,8 @@ window.sleep = ms => new Promise(r => setTimeout(r, ms));
 window.__close = async () => { [...document.querySelectorAll('ytcp-button, button')].filter(b => b.offsetParent && b.innerText.trim() === 'Fermer').forEach(b => b.click()); await sleep(1000); };
 window.__hidePops = () => [...document.querySelectorAll('tp-yt-iron-dropdown')].filter(e => e.offsetParent && /#\w/.test(e.innerText)).forEach(p => p.style.display = 'none');
 window.__open = async () => {
+  const up = document.querySelector('#upload-icon');
+  if (up && up.offsetParent) { up.click(); for (let i = 0; i < 25; i++) { await sleep(400); const inp = [...document.querySelectorAll('ytcp-uploads-file-picker input[type=file]')].find(x => x.closest('ytcp-uploads-dialog')); if (inp) return inp; } }
   const item = () => [...document.querySelectorAll('tp-yt-paper-item')].find(i => /Importer des vidéos/.test(i.innerText) && i.offsetParent);
   const direct = [...document.querySelectorAll('ytcp-button, button')].find(e => e.innerText && e.innerText.trim() === 'Importer des vidéos' && e.offsetParent);
   if (direct) direct.click();
@@ -36,6 +39,7 @@ window.__fill = async (meta) => {
 };
 window.__dateType = async (label) => {
   const d = document.querySelector('ytcp-uploads-dialog');
+  if (!d.querySelector('#datepicker-trigger')?.offsetParent) { [...d.querySelectorAll('*')].find(e => e.childElementCount === 0 && e.textContent.trim() === 'Programmer' && e.offsetParent)?.click(); await sleep(1200); }
   if (d.querySelector('#datepicker-trigger').innerText.trim() === label) return 'same';
   let ins = [...document.querySelectorAll('ytcp-date-picker input')].filter(i => i.offsetParent);
   if (!ins.length) { d.querySelector('#datepicker-trigger').click(); await sleep(900); __hidePops(); ins = [...document.querySelectorAll('ytcp-date-picker input')].filter(i => i.offsetParent); }
@@ -48,6 +52,19 @@ window.__A = async (metaPath, label) => {
   const meta = await (await fetch(RAW + metaPath)).json();
   const inp = await __open(); if (!inp) return 'STOP NOOPEN';
   const b = await (await fetch(RAW + meta.file)).blob(); if (b.size < 100000) return 'STOP NOFILE';
+  const dt = new DataTransfer(); dt.items.add(new File([b], meta.file.split('/').pop(), {type: "video/mp4"}));
+  inp.files = dt.files; inp.dispatchEvent(new Event('change', {bubbles: true}));
+  await sleep(13000);
+  const f = await __fill(meta);
+  if (!f.startsWith(meta.title.slice(0, 10))) return 'STOP FILL ' + f;
+  return f + ' | ' + (await __dateType(label));
+};
+// Gros fichiers (épisodes) : __F d'abord (téléchargement), puis __A2(date) — chaque appel reste sous 45 s.
+window.__F = async (metaPath) => { window.__meta = await (await fetch(RAW + metaPath)).json(); window.__blob = await (await fetch(RAW + __meta.file)).blob(); return __meta.file + ' ' + __blob.size; };
+window.__A2 = async (label) => {
+  await __close();
+  const meta = __meta, b = __blob; if (!b || b.size < 100000) return 'STOP NOFILE';
+  const inp = await __open(); if (!inp) return 'STOP NOOPEN';
   const dt = new DataTransfer(); dt.items.add(new File([b], meta.file.split('/').pop(), {type: "video/mp4"}));
   inp.files = dt.files; inp.dispatchEvent(new Event('change', {bubbles: true}));
   await sleep(13000);
