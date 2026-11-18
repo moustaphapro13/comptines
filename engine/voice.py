@@ -2,11 +2,13 @@
 import json
 import numpy as np
 import pyworld as pw
+import parselmouth
+from parselmouth.praat import call
 from scipy.signal import resample_poly
 from piper import PiperVoice, SynthesisConfig
 
 VOICES = {
-    "fr": "/home/claude/voice/fr-siwis-medium.onnx",
+    "fr": "/home/claude/voice/sherpa/vits-piper-fr_FR-siwis-medium/fr_FR-siwis-medium.onnx",
     "en": "/home/claude/voice/en-us-lessac-medium.onnx",
     "es": "/home/claude/voice/es-mls_10246-low.onnx",
 }
@@ -125,37 +127,69 @@ def warp(sp, ratio):
     return out
 
 
+_rawpsola = {}
+
+
+def _syll_audio(lang, phon):
+    key = (lang, phon)
+    if key not in _rawpsola:
+        v = voice(lang); sr = _sr[lang]
+        ids = v.phonemes_to_ids(list(phon))
+        a = v.phoneme_ids_to_audio(ids, SynthesisConfig(length_scale=1.4, noise_scale=0.5, noise_w_scale=0.5)).astype(np.float64)
+        env = np.abs(a); idx = np.where(env > env.max() * 0.03)[0]
+        a = a[max(0, idx[0] - 50): idx[-1] + 300]
+        snd = parselmouth.Sound(a, sr)
+        pt = snd.to_pitch_ac(0.005, 90, 600)
+        f = pt.selected_array["frequency"]; ts = pt.xs()
+        vi = np.where(f > 0)[0]
+        if len(vi) >= 3:
+            v0, v1 = ts[vi[0]], ts[vi[-1]]
+        else:
+            v0, v1 = len(a) / sr * 0.3, len(a) / sr * 0.7
+        _rawpsola[key] = (a, sr, v0, v1)
+    return _rawpsola[key]
+
+
 def sing(lang, phon, midi, dur, prev=None, formant=1.0, breath=0.0, out_sr=44100):
-    f0, sp, ap, sr = raw(lang, phon)
-    voiced = np.where(f0 > 0)[0]
-    v0, v1 = voiced[0], voiced[-1] + 1
-    n_on, n_co = v0, len(f0) - v1
-    total = int(dur * 1000 / FP)
-    n_mid = max(8, total - n_co)
-    src = np.linspace(v0, v1 - 1, n_mid)
-    lo = np.floor(src).astype(int); fr = (src - lo)[:, None]
-    hi = np.minimum(lo + 1, v1 - 1)
-    sp_m = np.exp(np.log(sp[lo] + 1e-12) * (1 - fr) + np.log(sp[hi] + 1e-12) * fr)
-    ap_m = ap[lo] * (1 - fr) + ap[hi] * fr
-    sp2 = np.vstack([sp[:v0], sp_m, sp[v1:]])
-    ap2 = np.vstack([ap[:v0], ap_m, ap[v1:]])
+    """Chant naturel : synthèse Piper puis PSOLA (Praat) pour la hauteur et la durée (pas de vocodeur)."""
+    a, sr, v0, v1 = _syll_audio(lang, phon)
+    T = len(a) / sr
+    vlen = max(0.04, v1 - v0)
+    onset, coda = v0, T - v1
+    k = max(0.25, (dur - coda - onset * 0.0) / vlen) if dur > onset + coda else max(0.25, (dur * 0.6) / vlen)
+    snd = parselmouth.Sound(a, sr)
+    man = call(snd, "To Manipulation", 0.01, 75, 600)
+    dt = call("Create DurationTier", "d", 0, T)
+    call(dt, "Add point", max(0.0, v0 - 0.005), 1.0); call(dt, "Add point", v0 + 0.005, k)
+    call(dt, "Add point", v1 - 0.005, k); call(dt, "Add point", min(T, v1 + 0.005), 1.0)
+    call([man, dt], "Replace duration tier")
     target = 440.0 * 2 ** ((midi - 69) / 12)
-    tt = np.arange(n_mid) * FP / 1000
-    semis = np.zeros(n_mid)
-    if prev is not None and prev != midi:
-        g = np.clip(tt / 0.05, 0, 1)
-        semis += (prev - midi) * (1 - g * g * (3 - 2 * g))
-    semis += 0.28 * np.sin(2 * np.pi * 5.3 * tt) * np.clip((tt - 0.22) / 0.2, 0, 1)
-    f0_2 = np.concatenate([np.zeros(n_on), target * 2 ** (semis / 12), np.zeros(n_co)])
+    ptier = call("Create PitchTier", "p", 0, T)
+    n = 40
+    for i in range(n + 1):
+        u = i / n
+        to = u * vlen * k                       # temps de sortie depuis le début de la voyelle
+        ti = v0 + u * vlen                      # temps d'origine correspondant
+        semis = 0.0
+        if prev is not None and prev != midi:
+            g = min(1.0, to / 0.06); semis += (prev - midi) * (1 - g * g * (3 - 2 * g))
+        semis += 0.22 * np.sin(2 * np.pi * 5.2 * to) * min(1.0, max(0.0, (to - 0.25) / 0.2))
+        semis += 0.04 * np.sin(2 * np.pi * 1.3 * to + midi)
+        call(ptier, "Add point", ti, target * 2 ** (semis / 12))
+    call(ptier, "Add point", max(0, v0 - 0.02), target * 2 ** (((prev - midi) if prev is not None else 0) / 12))
+    call(ptier, "Add point", min(T, v1 + 0.02), target)
+    call([man, ptier], "Replace pitch tier")
+    out = call(man, "Get resynthesis (overlap-add)")
     if formant != 1.0:
-        sp2 = warp(sp2, formant)
+        out = call(out, "Change gender", 75, 600, formant, 0, 1, 1)
+    y = out.values[0].astype(np.float64)
     if breath:
-        ap2 = np.clip(ap2 + breath, 0, 1)
-    y = pw.synthesize(np.ascontiguousarray(f0_2), np.ascontiguousarray(sp2), np.ascontiguousarray(ap2), sr, FP)
-    rel = int(0.04 * sr)
+        y = y + breath * 0.02 * np.random.default_rng(len(y)).standard_normal(len(y)) * (np.abs(y) > 0.01)
+    rel = int(0.04 * out.sampling_frequency)
     if len(y) > rel:
         y[-rel:] *= np.linspace(1, 0, rel)
     from math import gcd
-    g = gcd(out_sr, sr)
-    y = resample_poly(y, out_sr // g, sr // g)
-    return y, n_on * FP / 1000
+    sr2 = int(out.sampling_frequency)
+    g = gcd(out_sr, sr2)
+    y = resample_poly(y, out_sr // g, sr2 // g)
+    return y, onset
