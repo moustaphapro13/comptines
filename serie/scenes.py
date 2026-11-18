@@ -47,15 +47,27 @@ class Scene:
         getattr(self, "_" + self.name)(c, cam, t, props)
 
     # ---------------------------------------------------------- clairière enneigée
-    def _clairiere(self, c, cam, t, props, dusk=False):
-        if dusk:
+    def _clairiere(self, c, cam, t, props, dusk=False, mode=None):
+        mode = mode or ("dusk" if dusk else "day")
+        night = mode in ("night", "fete")
+        dusk = mode in ("dusk", "night", "fete")
+        if mode == "dusk":
             sky(c, "#3B3A7A", "#F2A27A")
+        elif night:
+            sky(c, "#0E1638", "#3A4D8F")
+        elif mode == "storm":
+            sky(c, "#7C8796", "#C9D2DC")
         else:
             sky(c, "#9CCBF2", "#EAF4FF")
         # soleil / lune
         c.save(); cam_apply(c, cam, 0.05)
-        if dusk:
+        if mode == "storm":
+            pass
+        elif dusk:
             ellipse(c, 1500, 260, 70, 70); c.set_source_rgba(1, 0.95, 0.8, 1); c.fill()
+            if night:
+                g = cairo.RadialGradient(1500, 260, 60, 1500, 260, 260)
+                g.add_color_stop_rgba(0, 1, 1, 0.85, 0.35); g.add_color_stop_rgba(1, 1, 1, 0.85, 0); c.set_source(g); c.paint()
             rnd = random.Random(3)
             for k in range(40):
                 x, y = rnd.random() * W * 1.2 - 100, rnd.random() * 420
@@ -67,17 +79,17 @@ class Scene:
             c.set_source(g); c.paint()
         c.restore()
         c.save(); cam_apply(c, cam, 0.15)
-        hills(c, 640, 90, "#C9DCF0" if not dusk else "#8E8BB8", 1)
+        hills(c, 640, 90, "#C9DCF0" if not dusk else ("#2E3A6B" if night else "#8E8BB8"), 1)
         c.restore()
         c.save(); cam_apply(c, cam, 0.35)
-        hills(c, 720, 60, "#DDEAF7" if not dusk else "#B7A9C9", 2)
+        hills(c, 720, 60, "#DDEAF7" if not dusk else ("#4A5A8E" if night else "#B7A9C9"), 2)
         rnd = random.Random(7)
         for k in range(16):
             x = -300 + k * 170 + rnd.random() * 60
             fir(c, x, 745 + rnd.random() * 20, 150 + rnd.random() * 70, col="#4E8C78" if not dusk else "#3F5F66")
         c.restore()
         c.save(); cam_apply(c, cam, 0.7)
-        hills(c, 815, 25, "#EEF5FD" if not dusk else "#D8CCE0", 3)
+        hills(c, 815, 25, "#EEF5FD" if not dusk else ("#7484B8" if night else "#D8CCE0"), 3)
         rnd = random.Random(11)
         for x in (-200, 120, 330, 1650, 1880, 2150):
             fir(c, x, 830 + rnd.random() * 15, 260 + rnd.random() * 80, col="#2F7D5B" if not dusk else "#2D5450")
@@ -89,8 +101,8 @@ class Scene:
         c.curve_to(300, GROUND - 40, 1200, GROUND + 10, 2800, GROUND - 20)
         c.line_to(2800, H + 600); c.line_to(-800, H + 600); c.close_path()
         g = cairo.LinearGradient(0, GROUND - 40, 0, H)
-        g.add_color_stop_rgb(0, *(hexc("#FFFFFF")[:3] if not dusk else hexc("#F0E4EE")[:3]))
-        g.add_color_stop_rgb(1, *(hexc("#DCE9F7")[:3] if not dusk else hexc("#C7B8D6")[:3]))
+        g.add_color_stop_rgb(0, *(hexc("#FFFFFF")[:3] if not dusk else hexc("#9FB0DD" if night else "#F0E4EE")[:3]))
+        g.add_color_stop_rgb(1, *(hexc("#DCE9F7")[:3] if not dusk else hexc("#6D7FB5" if night else "#C7B8D6")[:3]))
         c.set_source(g); c.fill()
         rnd = random.Random(5)
         for k in range(26):  # petites ombres / bosses de neige
@@ -100,7 +112,20 @@ class Scene:
         c.restore()
 
     def _soir(self, c, cam, t, props):
-        self._clairiere(c, cam, t, props, dusk=True)
+        self._clairiere(c, cam, t, props, mode="dusk")
+
+    def _nuit(self, c, cam, t, props):
+        self._clairiere(c, cam, t, props, mode="night")
+
+    def _tempete(self, c, cam, t, props):
+        self._clairiere(c, cam, t, props, mode="storm")
+
+    def _fete(self, c, cam, t, props):
+        self._clairiere(c, cam, t, props, mode="fete")
+
+    def _cuisine(self, c, cam, t, props):
+        p = dict(props); p["kitchen"] = True
+        self._interieur(c, cam, t, p)
 
     # ---------------------------------------------------------- intérieur du terrier
     def _interieur(self, c, cam, t, props):
@@ -166,8 +191,18 @@ class Scene:
         # tapis
         c.save(); c.translate(820, GROUND + 40); c.scale(1, 0.22); ellipse(c, 0, 0, 420, 300)
         c.set_source_rgb(*hexc("#5B8DEF")[:3]); c.fill_preserve(); c.set_line_width(10); c.set_source_rgb(*hexc("#F2C94C")[:3]); c.stroke(); c.restore()
+        if props.get("kitchen"):
+            # four en pierre
+            c.rectangle(1500, GROUND - 330, 330, 300); fill_stroke(c, hexc("#B9A48A"), 4)
+            c.arc(1665, GROUND - 160, 90, math.pi, 0); c.line_to(1755, GROUND - 90); c.line_to(1575, GROUND - 90); c.close_path()
+            fill_stroke(c, hexc("#3B2A1E"), 4)
+            g5 = cairo.RadialGradient(1665, GROUND - 120, 5, 1665, GROUND - 120, 90)
+            g5.add_color_stop_rgba(0, 1, 0.6, 0.2, 0.9 if props.get("oven", 1) else 0); g5.add_color_stop_rgba(1, 1, 0.4, 0.1, 0)
+            c.set_source(g5); c.arc(1665, GROUND - 120, 90, 0, 2 * math.pi); c.fill()
+            c.rectangle(1480, GROUND - 350, 370, 30); fill_stroke(c, hexc("#8A5E3B"), 4)
+        beds = [] if props.get("kitchen") else ((180, "#3D8BEB"), (1640, "#FF6F91"))
         # deux petits lits
-        for bx, col in ((180, "#3D8BEB"), (1640, "#FF6F91")):
+        for bx, col in beds:
             c.rectangle(bx - 150, GROUND - 120, 300, 90); fill_stroke(c, hexc("#C98B55"), 4)
             blob(c, [(bx - 145, GROUND - 120), (bx + 145, GROUND - 120), (bx + 150, GROUND - 60), (bx - 150, GROUND - 60)])
             fill_stroke(c, hexc(col), 4)

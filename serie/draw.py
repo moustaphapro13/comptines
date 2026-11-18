@@ -45,6 +45,10 @@ PAL = {
                   scarf2="#8ED8B8", size=1.28, flower="#FFD84A"),
     "papa": dict(spike="#5E3F28", spike2="#7A553A", face="#F0D2A6", belly="#E6BF8A", scarf="#E8A33D",
                  scarf2="#F6CF83", size=1.35, glasses=True),
+    "noisette": dict(sp="squirrel", spike="#D9772B", spike2="#F29A4A", face="#F7B877", belly="#FBE3C4",
+                     scarf="#8E6CCF", scarf2="#C3A9F0", size=0.95),
+    "pompon": dict(sp="rabbit", spike="#E8E4EE", spike2="#FFFFFF", face="#F4F1F7", belly="#FFFFFF",
+                   scarf="#F2C94C", scarf2="#FFE58A", size=0.9),
 }
 
 EMO_BROW = {"neutral": (0, 0), "happy": (0.02, -0.05), "excited": (0.04, -0.12), "surprised": (0.06, -0.15),
@@ -74,30 +78,36 @@ def hedgehog(c, who, x, y, s, st):
         ellipse(c, sd * 0.13 + f * 0.03, -0.035 - lift, 0.1, 0.05)
         fill_stroke(c, hexc("#5A3B26"))
     c.rotate(st.get("tilt", 0.0))
-    # piquants (dos + tête), derrière le corps
-    pts = []
-    n = 26
-    cx, cy, rx, ry = -f * 0.04, -0.52, 0.46, 0.5
-    for i in range(n + 1):
-        a = math.pi * (0.92 + 1.16 * i / n)       # de bas-gauche à bas-droite par le haut
-        r = 1.0 if i % 2 else 1.22
-        pts.append((cx + math.cos(a) * rx * r, cy + math.sin(a) * ry * r))
-    c.move_to(*pts[0])
-    for p in pts[1:]:
-        c.line_to(*p)
-    c.curve_to(cx + rx * 0.9, cy + 0.35, cx - rx * 0.9, cy + 0.35, *pts[0])
-    c.close_path()
-    g = cairo.LinearGradient(0, -1.1, 0, -0.1)
-    g.add_color_stop_rgb(0, *hexc(P["spike2"])[:3]); g.add_color_stop_rgb(1, *hexc(P["spike"])[:3])
-    c.set_source(g); c.fill_preserve(); c.set_source_rgb(*INK); c.stroke()
-    # quelques traits de piquants
-    c.set_line_width(LW * 0.7); c.set_source_rgba(*INK[:3], 0.5)
-    for i in range(1, n, 3):
-        a = math.pi * (0.92 + 1.16 * i / n)
-        c.move_to(cx + math.cos(a) * rx * 0.75, cy + math.sin(a) * ry * 0.75)
-        c.line_to(cx + math.cos(a) * rx * 1.05, cy + math.sin(a) * ry * 1.05)
-        c.stroke()
-    c.set_line_width(LW)
+    sp = P.get("sp", "hedgehog")
+    if sp == "squirrel":
+        c.save(); c.translate(-f * 0.22, -0.25)
+        blob(c, [(0, 0), (-f * 0.25, -0.15), (-f * 0.35, -0.55), (-f * 0.22, -0.95), (f * 0.02, -1.0), (f * 0.08, -0.8),
+                 (-f * 0.08, -0.6), (-f * 0.05, -0.3), (f * 0.1, -0.05)])
+        g = cairo.LinearGradient(0, -1, 0, 0); g.add_color_stop_rgb(0, *hexc(P["spike2"])[:3]); g.add_color_stop_rgb(1, *hexc(P["spike"])[:3])
+        c.set_source(g); c.fill_preserve(); c.set_source_rgb(*INK); c.stroke(); c.restore()
+    if sp == "hedgehog":
+        pts = []
+        n = 26
+        cx, cy, rx, ry = -f * 0.04, -0.52, 0.46, 0.5
+        for i in range(n + 1):
+            a = math.pi * (0.92 + 1.16 * i / n)
+            r = 1.0 if i % 2 else 1.22
+            pts.append((cx + math.cos(a) * rx * r, cy + math.sin(a) * ry * r))
+        c.move_to(*pts[0])
+        for p_ in pts[1:]:
+            c.line_to(*p_)
+        c.curve_to(cx + rx * 0.9, cy + 0.35, cx - rx * 0.9, cy + 0.35, *pts[0])
+        c.close_path()
+        g = cairo.LinearGradient(0, -1.1, 0, -0.1)
+        g.add_color_stop_rgb(0, *hexc(P["spike2"])[:3]); g.add_color_stop_rgb(1, *hexc(P["spike"])[:3])
+        c.set_source(g); c.fill_preserve(); c.set_source_rgb(*INK); c.stroke()
+        c.set_line_width(LW * 0.7); c.set_source_rgba(*INK[:3], 0.5)
+        for i in range(1, n, 3):
+            a = math.pi * (0.92 + 1.16 * i / n)
+            c.move_to(cx + math.cos(a) * rx * 0.75, cy + math.sin(a) * ry * 0.75)
+            c.line_to(cx + math.cos(a) * rx * 1.05, cy + math.sin(a) * ry * 1.05)
+            c.stroke()
+        c.set_line_width(LW)
     # bras arrière
     def arm(sd, ang):
         bx, by = sd * 0.25, -0.42
@@ -109,7 +119,9 @@ def hedgehog(c, who, x, y, s, st):
         ellipse(c, ex, ey, 0.05, 0.05); fill_stroke(c, hexc(P["face"]))
     # corps / ventre
     blob(c, [(0, -0.62), (0.27, -0.5), (0.31, -0.22), (0.2, -0.05), (0, -0.02), (-0.2, -0.05), (-0.31, -0.22), (-0.27, -0.5)])
-    fill_stroke(c, hexc(P["belly"]))
+    fill_stroke(c, hexc(P["belly"] if sp == "hedgehog" else P["face"]))
+    if sp != "hedgehog":
+        ellipse(c, f * 0.02, -0.28, 0.18, 0.22); c.set_source_rgba(*hexc(P["belly"])); c.fill()
     ellipse(c, f * 0.02, -0.25, 0.16, 0.17); c.set_source_rgba(1, 1, 1, 0.25); c.fill()
     arm(-1, st.get("armL", 0.25)); arm(1, st.get("armR", 0.25))
     # écharpe
@@ -127,18 +139,33 @@ def hedgehog(c, who, x, y, s, st):
     hx, hy = f * 0.05, -0.74
     hx += st.get("look", 0) * 0.02
     # oreilles
-    for sd in (-1, 1):
-        ellipse(c, hx + sd * 0.2 - f * 0.03, hy - 0.2, 0.065, 0.065); fill_stroke(c, hexc(P["face"]))
-        ellipse(c, hx + sd * 0.2 - f * 0.03, hy - 0.2, 0.035, 0.035); c.set_source_rgba(*hexc("#F4A3A8")); c.fill()
+    if sp == "rabbit":
+        for sd in (-1, 1):
+            c.save(); c.translate(hx + sd * 0.1, hy - 0.18); c.rotate(sd * 0.18 + st.get("ear", 0) * sd)
+            blob(c, [(0, 0), (sd * 0.07, -0.15), (sd * 0.06, -0.42), (0, -0.5), (-sd * 0.06, -0.42), (-sd * 0.06, -0.15)])
+            fill_stroke(c, hexc(P["face"]))
+            blob(c, [(0, -0.05), (sd * 0.035, -0.18), (0, -0.4), (-sd * 0.03, -0.18)]); c.set_source_rgba(*hexc("#F7B5C5")); c.fill()
+            c.restore()
+    elif sp == "squirrel":
+        for sd in (-1, 1):
+            c.move_to(hx + sd * 0.12, hy - 0.16); c.line_to(hx + sd * 0.22, hy - 0.42); c.line_to(hx + sd * 0.25, hy - 0.12); c.close_path()
+            fill_stroke(c, hexc(P["spike"]))
+    else:
+        for sd in (-1, 1):
+            ellipse(c, hx + sd * 0.2 - f * 0.03, hy - 0.2, 0.065, 0.065); fill_stroke(c, hexc(P["face"]))
+            ellipse(c, hx + sd * 0.2 - f * 0.03, hy - 0.2, 0.035, 0.035); c.set_source_rgba(*hexc("#F4A3A8")); c.fill()
     blob(c, [(hx - 0.25, hy - 0.05), (hx - 0.18, hy - 0.2), (hx, hy - 0.25), (hx + 0.18, hy - 0.2),
              (hx + 0.25, hy - 0.05), (hx + f * 0.3, hy + 0.08), (hx + f * 0.1, hy + 0.2), (hx - f * 0.15, hy + 0.18)])
     fill_stroke(c, hexc(P["face"]))
     # mèche de piquants sur le front
-    c.move_to(hx - 0.2, hy - 0.16)
-    for k in range(5):
-        c.line_to(hx - 0.16 + k * 0.08, hy - 0.3 + (0.06 if k % 2 else 0))
-    c.line_to(hx + 0.2, hy - 0.16); c.curve_to(hx + 0.08, hy - 0.2, hx - 0.08, hy - 0.2, hx - 0.2, hy - 0.16)
-    fill_stroke(c, hexc(P["spike2"]))
+    if sp != "hedgehog":
+        c.new_path()
+    else:
+        c.move_to(hx - 0.2, hy - 0.16)
+        for k in range(5):
+            c.line_to(hx - 0.16 + k * 0.08, hy - 0.3 + (0.06 if k % 2 else 0))
+        c.line_to(hx + 0.2, hy - 0.16); c.curve_to(hx + 0.08, hy - 0.2, hx - 0.08, hy - 0.2, hx - 0.2, hy - 0.16)
+        fill_stroke(c, hexc(P["spike2"]))
     if "flower" in P:
         c.save(); c.translate(hx + f * 0.17, hy - 0.26)
         for k in range(5):
@@ -153,11 +180,12 @@ def hedgehog(c, who, x, y, s, st):
         ellipse(c, 0, 0, 0.03, 0.03); fill_stroke(c, hexc(P["bow"]))
         c.restore()
     # museau
-    mx, my = hx + f * 0.2, hy + 0.06
-    blob(c, [(mx - f * 0.14, my - 0.06), (mx, my - 0.06), (mx + f * 0.1, my - 0.01), (mx, my + 0.05), (mx - f * 0.14, my + 0.07)])
-    fill_stroke(c, hexc(P["face"]))
-    ellipse(c, mx + f * 0.1, my - 0.02, 0.045, 0.038); fill_stroke(c, hexc("#2B1D16"))
-    ellipse(c, mx + f * 0.09, my - 0.035, 0.013, 0.01); c.set_source_rgba(1, 1, 1, 0.8); c.fill()
+    sn = {"rabbit": 0.45, "squirrel": 0.6}.get(sp, 1.0)
+    mx, my = hx + f * 0.2 * (0.6 + 0.4 * sn), hy + 0.06
+    blob(c, [(mx - f * 0.14 * sn, my - 0.06), (mx, my - 0.06), (mx + f * 0.1 * sn, my - 0.01), (mx, my + 0.05), (mx - f * 0.14 * sn, my + 0.07)])
+    fill_stroke(c, hexc(P["face"] if sp == "hedgehog" else P["belly"]))
+    ellipse(c, mx + f * 0.1 * sn, my - 0.02, 0.045, 0.038); fill_stroke(c, hexc("#2B1D16" if sp != "rabbit" else "#F48FB1"))
+    ellipse(c, mx + f * 0.09 * sn, my - 0.035, 0.013, 0.01); c.set_source_rgba(1, 1, 1, 0.8); c.fill()
     # joues
     ellipse(c, hx + f * 0.02, hy + 0.08, 0.06, 0.035); c.set_source_rgba(*hexc("#FF8FA3", 0.45)); c.fill()
     # yeux
@@ -219,7 +247,131 @@ def hedgehog(c, who, x, y, s, st):
         else:
             c.arc(ox, oy - 0.02, 0.045, 0.35, math.pi - 0.35)
         c.stroke(); c.set_line_width(LW)
+    hat = st.get("hat")
+    if hat == "star":
+        c.save(); c.translate(hx, hy - 0.42); c.rotate(0.1 * f); star_path(c, 0, 0, 0.17); fill_stroke(c, hexc("#FFD84A")); c.restore()
+    elif hat == "crown":
+        c.move_to(hx - 0.16, hy - 0.22); c.line_to(hx - 0.18, hy - 0.42); c.line_to(hx - 0.08, hy - 0.32); c.line_to(hx, hy - 0.46)
+        c.line_to(hx + 0.08, hy - 0.32); c.line_to(hx + 0.18, hy - 0.42); c.line_to(hx + 0.16, hy - 0.22); c.close_path(); fill_stroke(c, hexc("#F2C94C"))
+    elif hat == "dragon":
+        c.move_to(hx - 0.27, hy - 0.05); c.curve_to(hx - 0.3, hy - 0.45, hx + 0.3, hy - 0.45, hx + 0.27, hy - 0.05)
+        c.curve_to(hx + 0.2, hy - 0.2, hx - 0.2, hy - 0.2, hx - 0.27, hy - 0.05); fill_stroke(c, hexc("#4CAF50"))
+        for k in range(4):
+            xx = hx - 0.15 + k * 0.1
+            c.move_to(xx - 0.04, hy - 0.33 + abs(k - 1.5) * 0.02); c.line_to(xx, hy - 0.46 + abs(k - 1.5) * 0.03); c.line_to(xx + 0.04, hy - 0.33 + abs(k - 1.5) * 0.02)
+            fill_stroke(c, hexc("#FF8A65"))
+    elif hat == "bonnet":
+        c.move_to(hx - 0.24, hy - 0.12); c.curve_to(hx - 0.22, hy - 0.45, hx + 0.22, hy - 0.45, hx + 0.24, hy - 0.12); c.close_path()
+        fill_stroke(c, hexc(P["scarf"])); ellipse(c, hx, hy - 0.4, 0.06, 0.06); fill_stroke(c, hexc("#FFFFFF"))
+    hold = st.get("hold")
+    if hold:
+        ang = st.get("armR", 0.3); L = 0.22
+        ex, ey = 0.25 + math.sin(ang) * L, -0.42 + math.cos(ang) * L
+        item(c, hold, ex, ey, 0.3, st.get("lit", 1.0))
     c.restore()
+
+
+def star_path(c, x, y, r):
+    c.move_to(x, y - r)
+    for k in range(1, 10):
+        rr = r if k % 2 == 0 else r * 0.45
+        c.line_to(x + math.sin(k * math.pi / 5) * rr, y - math.cos(k * math.pi / 5) * rr)
+    c.close_path()
+
+
+def item(c, kind, x, y, s, lit=1.0):
+    """Petits objets (tenus en main ou posés) ; (x, y) = point d'attache, s = taille."""
+    c.save(); c.translate(x, y); c.scale(s, s); c.set_line_width(LW / max(s, 0.05) * 0.3 if s < 1 else LW)
+    c.set_line_width(0.08 if s < 1 else LW); c.set_line_join(cairo.LINE_JOIN_ROUND)
+    if kind == "lantern":
+        c.move_to(0, 0); c.line_to(0, 0.25); c.set_source_rgb(*INK); c.stroke()
+        if lit > 0:
+            g = cairo.RadialGradient(0, 0.65, 0.05, 0, 0.65, 1.4)
+            g.add_color_stop_rgba(0, 1, 0.85, 0.4, 0.55 * lit); g.add_color_stop_rgba(1, 1, 0.85, 0.4, 0)
+            c.set_source(g); c.arc(0, 0.65, 1.4, 0, 2 * math.pi); c.fill()
+        ellipse(c, 0, 0.65, 0.38, 0.42)
+        g = cairo.RadialGradient(0, 0.65, 0.05, 0, 0.65, 0.45)
+        g.add_color_stop_rgb(0, 1, 0.95 if lit else 0.7, 0.6 if lit else 0.5); g.add_color_stop_rgb(1, 1, 0.55 if lit else 0.35, 0.2)
+        c.set_source(g); c.fill_preserve(); c.set_source_rgb(*INK); c.stroke()
+        for k in (-1, 0, 1):
+            c.move_to(k * 0.2, 0.28); c.curve_to(k * 0.35, 0.55, k * 0.35, 0.75, k * 0.2, 1.02); c.set_source_rgba(0.7, 0.3, 0.1, 0.5); c.stroke()
+        c.rectangle(-0.18, 0.2, 0.36, 0.1); fill_stroke(c, hexc("#C0392B"))
+        c.rectangle(-0.15, 1.02, 0.3, 0.08); fill_stroke(c, hexc("#C0392B"))
+    elif kind == "envelope":
+        c.rectangle(-0.45, 0, 0.9, 0.6); fill_stroke(c, hexc("#FFF6E0"))
+        c.move_to(-0.45, 0); c.line_to(0, 0.32); c.line_to(0.45, 0); c.set_source_rgb(*INK); c.stroke()
+        ellipse(c, 0, 0.32, 0.09, 0.09); fill_stroke(c, hexc("#E84A4A"))
+    elif kind == "gift":
+        c.rectangle(-0.4, 0, 0.8, 0.7); fill_stroke(c, hexc("#E84A6F"))
+        c.rectangle(-0.07, 0, 0.14, 0.7); fill_stroke(c, hexc("#FFD84A"))
+        for sd in (-1, 1):
+            c.move_to(0, 0); c.curve_to(sd * 0.35, -0.3, sd * 0.4, 0.05, 0, 0); fill_stroke(c, hexc("#FFD84A"))
+    elif kind == "nut":
+        ellipse(c, 0, 0.3, 0.28, 0.3); fill_stroke(c, hexc("#B5793D"))
+        c.arc(0, 0.12, 0.3, math.pi, 0); fill_stroke(c, hexc("#7A4E26"))
+    elif kind == "pinecone":
+        for k in range(4):
+            ellipse(c, 0, 0.15 + k * 0.17, 0.25 - k * 0.04, 0.1); fill_stroke(c, hexc("#8A5A33"))
+    elif kind == "star":
+        star_path(c, 0, 0.4, 0.4); fill_stroke(c, hexc("#FFD84A"))
+    elif kind == "drawing":
+        c.rectangle(-0.5, 0, 1.0, 0.75); fill_stroke(c, hexc("#FFFFFF"))
+        for (cx, cy, col) in [(-0.2, 0.4, "#3D8BEB"), (0.0, 0.42, "#2E9E73"), (0.2, 0.4, "#FF6F91")]:
+            ellipse(c, cx, cy, 0.09, 0.14); c.set_source_rgba(*hexc(col)); c.fill()
+        c.move_to(-0.4, 0.6); c.line_to(0.4, 0.6); c.set_source_rgb(0.4, 0.7, 0.4); c.stroke()
+    c.restore()
+
+
+def cake(c, x, y, s, candles=0, lit=1.0):
+    c.save(); c.translate(x, y); c.scale(s, s); c.set_line_width(LW); c.set_line_join(cairo.LINE_JOIN_ROUND)
+    ellipse(c, 0, -0.02, 0.6, 0.08); fill_stroke(c, hexc("#E0E0E8"))
+    c.rectangle(-0.5, -0.45, 1.0, 0.42); fill_stroke(c, hexc("#B5793D"))
+    c.rectangle(-0.5, -0.3, 1.0, 0.07); c.set_source_rgba(*hexc("#FFF1D6")); c.fill()
+    c.move_to(-0.52, -0.45)
+    for k in range(9):
+        xx = -0.52 + k * 0.13
+        c.curve_to(xx + 0.03, -0.33, xx + 0.1, -0.33, xx + 0.13, -0.45)
+    c.line_to(0.52, -0.52); c.line_to(-0.52, -0.52); c.close_path(); fill_stroke(c, hexc("#FFF6EA"))
+    for k in range(5):
+        item(c, "nut", -0.36 + k * 0.18, -0.6, 0.18)
+    for k in range(candles):
+        xx = -0.3 + k * 0.3
+        c.rectangle(xx - 0.03, -0.85, 0.06, 0.3); fill_stroke(c, hexc("#7FB8FF"))
+        if lit:
+            ellipse(c, xx, -0.92, 0.04, 0.07); c.set_source_rgba(1, 0.7, 0.2, 1); c.fill()
+    c.restore()
+
+
+def garland(c, x0, x1, y, sag, t=0.0):
+    c.set_line_width(4); c.set_source_rgb(*INK)
+    c.move_to(x0, y); c.curve_to(x0 + (x1 - x0) * 0.3, y + sag, x0 + (x1 - x0) * 0.7, y + sag, x1, y); c.stroke()
+    n = int(abs(x1 - x0) / 70)
+    cols = ["#FF6F91", "#FFD84A", "#3D8BEB", "#6FCF97", "#F2994A"]
+    for k in range(1, n):
+        u = k / n
+        xx = (1 - u) ** 3 * x0 + 3 * (1 - u) ** 2 * u * (x0 + (x1 - x0) * 0.3) + 3 * (1 - u) * u * u * (x0 + (x1 - x0) * 0.7) + u ** 3 * x1
+        yy = (1 - u) ** 3 * y + 3 * (1 - u) ** 2 * u * (y + sag) + 3 * (1 - u) * u * u * (y + sag) + u ** 3 * y
+        tw = 0.6 + 0.4 * math.sin(t * 3 + k)
+        g = cairo.RadialGradient(xx, yy + 14, 2, xx, yy + 14, 40)
+        g.add_color_stop_rgba(0, *hexc(cols[k % 5])[:3], 0.45 * tw); g.add_color_stop_rgba(1, *hexc(cols[k % 5])[:3], 0)
+        c.set_source(g); c.arc(xx, yy + 14, 40, 0, 2 * math.pi); c.fill()
+        ellipse(c, xx, yy + 14, 10, 14); c.set_source_rgba(*hexc(cols[k % 5])); c.fill_preserve(); c.set_source_rgb(*INK); c.set_line_width(2.5); c.stroke()
+
+
+def deco_fir(c, x, y, s, stage, t=0.0):
+    """Sapin de la fête : 1 = nu, 2 = pommes de pin, 3 = + guirlande, 4 = + étoile."""
+    fir(c, x, y, s, snow=True)
+    if stage >= 2:
+        for (u, v) in [(-0.2, -0.3), (0.18, -0.36), (-0.12, -0.6), (0.12, -0.66), (0.0, -0.85), (-0.25, -0.12), (0.26, -0.15)]:
+            item(c, "pinecone", x + u * s, y + v * s, s * 0.07)
+    if stage >= 3:
+        for (u0, u1, v) in [(-0.3, 0.3, -0.25), (-0.2, 0.2, -0.55), (-0.12, 0.12, -0.8)]:
+            garland(c, x + u0 * s, x + u1 * s, y + v * s, s * 0.06, t)
+    if stage >= 4:
+        g = cairo.RadialGradient(x, y - 1.05 * s, 5, x, y - 1.05 * s, s * 0.35)
+        g.add_color_stop_rgba(0, 1, 0.9, 0.4, 0.6); g.add_color_stop_rgba(1, 1, 0.9, 0.4, 0)
+        c.set_source(g); c.arc(x, y - 1.05 * s, s * 0.35, 0, 2 * math.pi); c.fill()
+        c.save(); c.translate(x, y - 1.05 * s); c.rotate(0.1 * math.sin(t)); star_path(c, 0, 0, s * 0.11); fill_stroke(c, hexc("#FFD84A"), 4); c.restore()
 
 
 def owl(c, x, y, s, st):

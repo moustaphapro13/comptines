@@ -1,0 +1,48 @@
+"""Ding et Dang — Épisode 9 : La surprise pour Maman."""
+from serie.common import opening, ending
+
+S = {"scenes": [
+    opening(9, "La surprise pour Maman"),
+    dict(bg="clairiere", music="magic", props=dict(snow=True, snowman=4, snowman_x=1300),
+         cast={"ding": dict(x=520, emo="happy"), "dang": dict(x=260, emo="happy"), "papa": dict(x=950, emo="happy", face=-1)},
+         beats=[
+             ("narr", "Plus que deux jours avant la Grande Fête de l'Hiver. Ce matin, Papa parle tout bas…"),
+             ("say", "papa", "Psst ! Maman a tout organisé pour la fête. Et si on lui préparait une surprise, à elle ?",
+              {"emo": "happy", "cam": ("two", "ding", "papa"), "voice": "whisper"}),
+             ("say", "dang", "Oh oui ! Une surprise rien que pour Maman !", {"emo": "excited", "act": "jump", "cam": ("close", "dang")}),
+             ("say", "ding", "Mais quoi ? Un gâteau ? On en a déjà fait un…", {"emo": "neutral", "cam": ("two", "dang", "ding")}),
+             ("say", "dang", "Un dessin ! Un grand dessin de toute la famille !", {"emo": "excited", "act": "cheer"}),
+             ("say", "papa", "Excellente idée. Mais chut… c'est un secret !", {"emo": "happy", "cam": "wide"}),
+             ("say", "ding", "Un secret ? On ne dit rien à personne. Même pas à Monsieur Flocon !", {"emo": "happy", "act": "nod"}),
+             ("say", "dang", "Surtout pas à Monsieur Flocon. Il est trop bavard !", {"emo": "excited", "act": "jump"}),
+             ("say", "papa", "Ha ha ! Allez, au travail, mes petits artistes.", {"emo": "happy", "act": "point"}),
+         ]),
+    dict(bg="interieur", music="cozy", props=dict(snowing=True, items=[("drawing", 820, 690, 150)]),
+         cast={"ding": dict(x=600, emo="happy"), "dang": dict(x=1040, emo="happy", face=-1), "maman": dict(x=2300, emo="happy", face=-1)},
+         beats=[
+             ("narr", "Ding dessine Papa et Maman. Dang dessine Ding et Dang, avec de grands sourires.", {"cam": ("at", 820, 640, 1.35)}),
+             ("say", "dang", "Et j'ajoute des cœurs partout !", {"emo": "excited", "cam": ("two", "ding", "dang")}),
+             ("walk", "maman", 1500, 1.6, {"wait": False}),
+             ("say", "maman", "Mes petits ? Qu'est-ce que vous faites, si calmes ?", {"emo": "surprised", "delay": 1.0, "cam": "wide"}),
+             ("both", ["ding", "dang"], "Rien ! Rien du tout !", {"emo": "surprised", "voice": "excited", "act": "shake", "set": ("items", [])}),
+             ("say", "ding", "On… on rangeait nos crayons !", {"emo": "worried", "cam": ("close", "ding")}),
+             ("say", "maman", "Hmm… Vous êtes bien mystérieux, tous les deux.", {"emo": "happy", "cam": ("close", "maman")}),
+             ("walk", "maman", 2300, 1.6),
+             ("say", "dang", "Ouf ! Elle n'a rien vu !", {"emo": "happy", "cam": ("two", "ding", "dang")}),
+             ("say", "ding", "Tu crois qu'elle va aimer notre dessin ?", {"emo": "worried"}),
+             ("say", "dang", "J'en suis sûre. Parce qu'on l'a fait avec tout notre cœur !", {"emo": "happy", "act": "nod"}),
+             ("say", "ding", "Garder un secret, c'est difficile… mais c'est pour faire plaisir !", {"emo": "proud"}),
+             ("set", "items", [("gift", 820, 640, 160)]), ("sfx", "sparkle"), ("fx", "sparkle", {"x": 820, "y": 650}),
+             ("narr", "Le dessin est roulé et caché dans un joli paquet, avec un grand ruban jaune.", {"cam": ("at", 820, 640, 1.35)}),
+         ]),
+    dict(bg="soir", music="calm", props=dict(snow=True, snowman=4, snowman_x=1160, owl=(1720, 330)),
+         cast={"ding": dict(x=820, emo="happy"), "dang": dict(x=520, emo="happy")},
+         beats=[
+             ("say", "dang", "Demain, c'est enfin la Grande Fête de l'Hiver !", {"emo": "excited", "act": "jump", "cam": ("two", "dang", "ding")}),
+             ("say", "ding", "Les lanternes, les invitations, le gâteau, la chanson, le sapin, les déguisements… et la surprise !",
+              {"emo": "proud"}),
+             ("narr", "Neuvième mission réussie ! Plus qu'une nuit à dormir… Demain, c'est le grand jour. À suivre…",
+              {"cam": "wide", "gap": 1.0}),
+         ]),
+    ending("La Grande Fête de l'Hiver"),
+]}

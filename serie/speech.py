@@ -20,6 +20,8 @@ CAST = {
     "papa":  ("tom", None, 0.95, 0.97),
     "ding":  ("tom", None, 0.85, 1.3),
     "dang":  ("siwis", None, 0.9, 1.18),
+    "noisette": ("upmc", 0, 1.0, 1.2),
+    "pompon": ("upmc", 1, 0.85, 1.38),
 }
 SR = 44100
 CACHE = "/tmp/serie_tts2"; os.makedirs(CACHE, exist_ok=True)

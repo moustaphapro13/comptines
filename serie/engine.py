@@ -10,6 +10,7 @@ from .speech import say, SR
 
 FPS = 25
 NAMES = {"ding": ("Ding", "#3D8BEB"), "dang": ("Dang", "#FF4F7B"), "maman": ("Maman", "#2E9E73"),
+         "noisette": ("Noisette", "#D9772B"), "pompon": ("Pompon", "#C9A400"),
          "papa": ("Papa", "#D88A1E"), "narr": ("Papy Hibou", "#8A6A4A")}
 SIZE = 330          # taille d'un hérisson (enfant) en px monde
 
@@ -105,7 +106,7 @@ class Ep:
             t1 = t0 + n / SR
             self.lines.append(dict(t0=t0, t1=t1, who=who, text=text, audio=mix, env=self.env(mix)))
             self._opts(who, o, t0, t1)
-            self.t = t1 + o.get("gap", 0.35)
+            self.t = t1 + o.get("gap", 0.5)
         elif kind == "walk":
             _, n, x, dur = b[:4]; o = b[4] if len(b) > 4 else {}
             x0 = self.xat(n, self.t)
@@ -288,6 +289,24 @@ class Renderer:
         self.scn[sc["bg"]].draw_back(c, cam, t, props)
         c.save(); cam_apply(c, cam, 1.0)
         # accessoires de décor au sol
+        if props.get("fir"):
+            D.deco_fir(c, props["fir"][0], GROUND + 10, props["fir"][1], props.get("fir_stage", 1), t)
+        if props.get("garlands"):
+            D.garland(c, -100, 700, 120, 90, t); D.garland(c, 650, 1400, 140, 80, t + 1); D.garland(c, 1350, 2050, 110, 90, t + 2)
+        for k, lx in enumerate(props.get("lanterns", [])):
+            c.set_line_width(8); c.set_source_rgb(0.42, 0.28, 0.16)
+            c.move_to(lx, GROUND + 30); c.line_to(lx, GROUND - 330); c.line_to(lx + 60, GROUND - 330); c.stroke()
+            D.item(c, "lantern", lx + 60, GROUND - 330, 110, 1.0 if k < props.get("lanterns_lit", 0) else 0.0)
+        if props.get("table"):
+            tx = props["table"]
+            c.rectangle(tx - 260, GROUND - 230, 520, 34); D.fill_stroke(c, D.hexc("#A86F44"), 4)
+            for sd in (-1, 1):
+                c.rectangle(tx + sd * 220 - 15, GROUND - 200, 30, 220); D.fill_stroke(c, D.hexc("#8A5E3B"), 4)
+        if props.get("cake"):
+            cx_, cy_, cs_ = props["cake"]
+            D.cake(c, cx_, cy_, cs_, props.get("candles", 0))
+        for (kind, ix, iy, isz) in props.get("items", []):
+            D.item(c, kind, ix, iy, isz)
         if props.get("snowman", 0):
             D.snowman(c, props.get("snowman_x", 960), GROUND + 20, 380, props["snowman"])
         for (k, (bx, r)) in [("ball1", props.get("ball1", (0, 0))), ("ball2", props.get("ball2", (0, 0)))]:
@@ -303,7 +322,13 @@ class Renderer:
             if s:
                 chars.append((s[0], n, s))
         for (_, n, (x, y, st)) in sorted(chars, key=lambda q: 0 if q[1] in ("maman", "papa") else 1):
-            st["wind"] = math.sin(t * 2 + x)
+            st["wind"] = math.sin(t * 2 + x) * (1 + 3 * props.get("storm", 0))
+            if props.get("hat_" + n):
+                st["hat"] = props["hat_" + n]
+            if props.get("hold_" + n):
+                st["hold"] = props["hold_" + n]
+                if st.get("armR", 0) < 0.9:
+                    st["armR"] = 0.9
             D.hedgehog(c, n, x, y, SIZE, st)
         # effets
         for (t0, kind, d) in ep.fx:
@@ -333,9 +358,10 @@ class Renderer:
         c.restore()
         # neige qui tombe (plein écran, parallaxe)
         if props.get("snow", False):
+            storm = props.get("storm", 0)
             for (x0, y0, d, ph) in self.flakes:
-                y = (y0 + t * 40 * d) % (H + 40) - 20
-                x = (x0 + 25 * math.sin(t * 0.8 + ph) - (cam[0] - W / 2) * d * 0.3) % (W + 40) - 20
+                y = (y0 + t * 40 * d * (1 + 3 * storm)) % (H + 40) - 20
+                x = (x0 + 25 * math.sin(t * 0.8 + ph) - t * 260 * d * storm - (cam[0] - W / 2) * d * 0.3) % (W + 40) - 20
                 r = 2 + 3.2 * d
                 D.ellipse(c, x, y, r, r); c.set_source_rgba(1, 1, 1, 0.55 + 0.25 * min(1, d)); c.fill()
         # titre / générique
