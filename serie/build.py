@@ -24,9 +24,9 @@ def main():
             print(round(L["t0"], 1), L["who"], L["text"][:50])
         return
     os.makedirs("out/serie", exist_ok=True)
-    J = {"jingle": "/tmp/jingle.wav", "jingle_end": "/tmp/jingle_inst.wav"}
+    J = {"jingle": "/tmp/jingle_i.wav", "jingle_end": "/tmp/jingle_inst.wav"}
     if not os.path.exists(J["jingle"]):
-        jingle.make(J["jingle"]); jingle.make(J["jingle_end"], instrumental=True)
+        jingle.make(J["jingle"], instrumental=True); jingle.make(J["jingle_end"], instrumental=True)
     wav = f"/tmp/{slug}.wav"
     render_audio(ep, wav, J)
     out = f"out/serie/ding-et-dang-{slug}.mp4"
