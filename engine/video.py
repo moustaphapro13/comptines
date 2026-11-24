@@ -310,6 +310,7 @@ class Video:
             dr.text((W / 2 - f.getlength(txt) / 2, L["py"] - f.size * 0.62 - 6), txt, font=f, fill=(240, 60, 110))
         # étiquette de section
         for a, b_, lab in tl["labels"]:
+            lab = lab.replace("_", "\u00a0")
             if a - 1 <= beat < b_:
                 v = ease((beat - a + 1) / 0.6) * (1 - ease((beat - b_ + 0.6) / 0.6))
                 if v > 0.01:

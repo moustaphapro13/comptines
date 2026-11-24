@@ -1,5 +1,6 @@
 TITLE = "Brosse, brosse les dents"
 LANG = "fr"
+ORIGINAL = True
 BPM = 116
 # Comptine inédite (paroles et mélodie originales, Ding Dang comptines).
 L1 = "Bros~|G|0.5 se,|E|0.5 bros~|G|0.5 se,|E|0.5 bros~|G|1 se|E|0.5 les|F|0.5 dents,|D|2 |-|2"

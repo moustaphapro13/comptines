@@ -7,6 +7,8 @@ CREDIT = {"fr": "Voix de synthèse : Piper, voix « siwis » (CC-BY 4.0). Compti
           "en": "Synthetic voice: Piper (\"lessac\" voice). Traditional nursery rhyme (public domain), original animation and music."}
 TAGS = {"fr": ["comptine", "comptines", "chanson pour enfants", "comptine maternelle", "karaoké enfant", "chanson enfant"],
         "en": ["nursery rhymes", "kids songs", "nursery rhyme", "songs for kids", "sing along", "toddler songs"]}
+CREDIT_ORIG = {"fr": "Comptine originale Ding Dang comptines : paroles, musique et animation originales. Voix de synthèse : Piper, voix « siwis » (CC-BY 4.0).",
+               "en": "Original song by Ding Dang Nursery Rhymes: original lyrics, music and animation. Synthetic voice: Piper (\"lessac\" voice)."}
 HASH = {"fr": "#comptine #chansonpourenfants #maternelle", "en": "#nurseryrhymes #kidssongs #singalong"}
 
 
@@ -37,7 +39,7 @@ def make(path, kind, date, time):
         title = f"{m.TITLE} 🎶 " + ("Comptine pour enfants avec paroles (karaoké)" if L == "fr" else "Nursery Rhyme with Lyrics | Sing Along")
         intro = ("Chante avec nous ! Paroles à l'écran, couplets variés et un passage karaoké pour chanter tout seul. 🎶" if L == "fr"
                  else "Sing along with us! Lyrics on screen, fun verses and a karaoke part to sing on your own. 🎶")
-    desc = f"{intro}\n\n{'Paroles' if L == 'fr' else 'Lyrics'} :\n{lyr}\n\n{CREDIT[L]}\n\n{HASH[L]}"
+    desc = f"{intro}\n\n{'Paroles' if L == 'fr' else 'Lyrics'} :\n{lyr}\n\n{(CREDIT_ORIG if getattr(m, 'ORIGINAL', False) else CREDIT)[L]}\n\n{HASH[L]}"
     tags = [m.TITLE.lower()] + TAGS[L]
     d = os.path.join("out", L, slug); os.makedirs(d, exist_ok=True)
     meta = dict(file=f"{d}/{slug}_{kind}.mp4", title=title[:100], description=desc, tags=tags, lang=L,
@@ -52,28 +54,28 @@ def make(path, kind, date, time):
 
 
 WEEK = [
-    ("songs/fr/savez_vous_planter_les_choux.py", "short", "2026-11-19", "11:00"),
-    ("songs/en/this_old_man.py", "short", "2026-11-19", "11:00"),
-    ("songs/fr/sur_le_pont_d_avignon.py", "short", "2026-11-20", "11:00"),
-    ("songs/fr/savez_vous_planter_les_choux.py", "long", "2026-11-20", "17:00"),
-    ("songs/en/hickory_dickory_dock.py", "short", "2026-11-20", "11:00"),
-    ("songs/en/this_old_man.py", "long", "2026-11-20", "17:00"),
-    ("songs/fr/savez_vous_planter_les_choux_2.py", "short", "2026-11-21", "11:00"),
-    ("songs/en/this_old_man_2.py", "short", "2026-11-21", "11:00"),
-    ("songs/fr/sur_le_pont_d_avignon_2.py", "short", "2026-11-22", "11:00"),
-    ("songs/en/old_macdonald_2.py", "short", "2026-11-22", "11:00"),
-    ("songs/fr/au_clair_karaoke.py", "short", "2026-11-23", "11:00"),
-    ("songs/fr/sur_le_pont_d_avignon.py", "long", "2026-11-23", "17:00"),
-    ("songs/en/this_old_man_3.py", "short", "2026-11-23", "11:00"),
-    ("songs/en/hickory_dickory_dock.py", "long", "2026-11-23", "17:00"),
-    ("songs/fr/sur_le_pont_d_avignon_3.py", "short", "2026-11-24", "11:00"),
-    ("songs/en/hickory_dickory_dock_2.py", "short", "2026-11-24", "11:00"),
-    ("songs/fr/savez_vous_planter_les_choux_3.py", "short", "2026-11-25", "11:00"),
-    ("songs/en/this_old_man_4.py", "short", "2026-11-25", "11:00"),
+    ("songs/fr/brosse_les_dents.py", "short", "2026-11-26", "11:00"),
+    ("songs/en/brushy_brush.py", "short", "2026-11-26", "11:00"),
+    ("songs/fr/plouf_dans_le_bain.py", "short", "2026-11-27", "11:00"),
+    ("songs/fr/brosse_les_dents.py", "long", "2026-11-27", "17:00"),
+    ("songs/en/bubble_bath.py", "short", "2026-11-27", "11:00"),
+    ("songs/en/brushy_brush.py", "long", "2026-11-27", "17:00"),
+    ("songs/fr/les_couleurs_de_dang.py", "short", "2026-11-28", "11:00"),
+    ("songs/en/colors_with_dang.py", "short", "2026-11-28", "11:00"),
+    ("songs/fr/bonne_nuit_ding_et_dang.py", "short", "2026-11-29", "11:00"),
+    ("songs/en/goodnight_ding_and_dang.py", "short", "2026-11-29", "11:00"),
+    ("songs/fr/brosse_les_dents_2.py", "short", "2026-11-30", "11:00"),
+    ("songs/fr/plouf_dans_le_bain.py", "long", "2026-11-30", "17:00"),
+    ("songs/en/brushy_brush_2.py", "short", "2026-11-30", "11:00"),
+    ("songs/en/bubble_bath.py", "long", "2026-11-30", "17:00"),
+    ("songs/fr/plouf_dans_le_bain_2.py", "short", "2026-12-01", "11:00"),
+    ("songs/en/bubble_bath_2.py", "short", "2026-12-01", "11:00"),
+    ("songs/fr/les_couleurs_de_dang_2.py", "short", "2026-12-02", "11:00"),
+    ("songs/en/colors_with_dang_2.py", "short", "2026-12-02", "11:00"),
 ]
 
 if __name__ == "__main__":
     sched = [make(*w) for w in WEEK]
-    json.dump(sched, open("semaine_2026-11-19.json", "w"), ensure_ascii=False, indent=1)
+    json.dump(sched, open("semaine_2026-11-26.json", "w"), ensure_ascii=False, indent=1)
     for s in sched:
         print(s["date"], s["time"], s["channel"][:14], s["kind"], s["title"])
