@@ -508,3 +508,26 @@ FACTORIES = dict(cabbage=cabbage, bone=bone, drum=drum, moon=moon, sun=sun, star
                  fence=fence, bridge=bridge, boat=boat, oar=oar, cake=cake, flame=flame, balloon=balloon,
                  stall=stall, bun=bun, window_frame=window_frame, bell=bell, tower=tower, candy_jar=candy_jar,
                  lollipop=lollipop, snowman=snowman, clock=clock, pendulum=pendulum, critter=critter)
+
+
+def hedgehog(size, who="ding", mood="happy", **kw):
+    """Ding, Dang (et leurs amis) dessinés avec le moteur de la série (cairo), pour les comptines."""
+    import cairo
+    from serie import draw as SD
+    w, h = int(size * 1.5), int(size * 1.35)
+    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+    c = cairo.Context(surf)
+    st = dict(facing=kw.get("face", 1), emo="happy", mouth=0.75 if mood == "sing" else 0.0,
+              armL=0.5, armR=0.5)
+    SD.hedgehog(c, who, w / 2, h * 0.97, size, st)
+    surf.flush()
+    import numpy as np
+    a = np.ndarray((h, w, 4), np.uint8, surf.get_data()).copy()
+    rgba = a[:, :, [2, 1, 0, 3]].astype(np.float32)
+    al = rgba[:, :, 3:4] / 255.0
+    rgba[:, :, :3] = np.where(al > 0, rgba[:, :, :3] / np.maximum(al, 1e-6), 0)
+    im = Image.fromarray(np.clip(rgba, 0, 255).astype(np.uint8), "RGBA")
+    return im, (w / 2, h * 0.97)
+
+
+FACTORIES["hedgehog"] = hedgehog
