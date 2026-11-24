@@ -13,3 +13,8 @@ Chaînes (même compte Google) : **Ding Dang comptines** (fr, UCmC_G9eVJ6ePrs3XI
 5. Shorts + légendes pour TikTok : copiés sur l'ordi dans `C:\Users\moust\Videos\Comptines\TikTok\<langue>\<date>_<slug>.mp4/.txt` (device_commit_files). TikTok bloque l'import par script : l'utilisateur choisit le fichier dans TikTok Studio, ensuite Claude peut remplir légende (saisie clavier, pas de execCommand), étiquette IA et programmation.
 
 Créneaux : Short tous les jours 11:00 ; vidéo longue lundi, mercredi, vendredi 17:00 (heure de Paris). Toujours « conçu pour les enfants ». Ne jamais publier immédiatement : toujours programmer.
+
+## Panneau du navigateur masqué
+Si l'app Claude n'affiche pas le panneau du navigateur, YouTube Studio n'ouvre plus ses fenêtres (requestAnimationFrame en pause).
+Les helpers remplacent requestAnimationFrame par un minuteur : tout fonctionne quand même. Les tests de visibilité utilisent
+getBoundingClientRect (et non offsetParent). Date : ouvrir le calendrier, sélectionner le champ, taper la date au clavier réel puis Entrée.

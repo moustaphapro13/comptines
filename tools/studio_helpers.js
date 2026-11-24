@@ -5,6 +5,8 @@
 //   2) clavier : touche Entrée (vraie touche, via l'outil computer key "Return") pour valider la date
 //   3) JS : await __C("16 nov. 2026", "11:00")   -> renvoie la date/heure + le lien ; "STOP ..." = vérifier à l'écran
 // Si __A renvoie "STOP FILL", attendre 5 s puis relancer __fill(meta) (la boîte de dialogue était encore grisée).
+// Panneau du navigateur masqué : sans ça, les fenêtres de Studio (import, calendrier, visibilité) ne s'ouvrent pas.
+window.requestAnimationFrame = cb => setTimeout(() => cb(performance.now()), 16);
 window.RAW = "https://raw.githubusercontent.com/moustaphapro13/comptines/main/";
 window.sleep = ms => new Promise(r => setTimeout(r, ms));
 window.__close = async () => { [...document.querySelectorAll('ytcp-button, button')].filter(b => b.offsetParent && b.innerText.trim() === 'Fermer').forEach(b => b.click()); await sleep(1000); };
